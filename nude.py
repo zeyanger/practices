@@ -138,15 +138,15 @@ class Nude:
                         break
 
                     # 相邻像素若为肤色像素
-                    if self.Skin_map[index].skin:
+                    if self.skin_map[index].skin:
                         # 若相邻像素与当前像素的region均为有效值，且二者不同，且尚未添加相同的合并任务
-                        if self.skin_map[index].region != None and 
-                        region != None and region != -1 and
-                        self.skin_map[index].region != region and 
-                        self.last_from != region and 
+                        if self.skin_map[index].region != None and \
+                        region != None and region != -1 and \
+                        self.skin_map[index].region != region and \
+                        self.last_from != region and \
                         self.last_to != self.skin_map[index].region :
                             # 添加两个区域的合并任务
-                            self._add_merge(region, skin_map[index].region)
+                            self._add_merge(region, self.skin_map[index].region)
                         # 记录此相邻像素所在的区域号
                         region = self.skin_map[index].region
 
@@ -168,8 +168,9 @@ class Nude:
     
     def _classify_skin(self, r, g, b):
         """根据ｒｇｂ值判定一个像素是否为肤色像素"""
-        rgb_classifier = r > 95 and g > 40 and g < 100 and b > 20 and r > g and
-        R > b and (max([r, g, b]) - min([r, g, b])) > 15 and abs(r - b) > 15
+        rgb_classifier = r > 95 and g > 40 and g < 100 and b > 20 and \
+                         r > g and r > b and (max([r, g, b]) - min([r, g, b]))\
+                         > 15 and abs(r - b) > 15
         
         return rgb_classifier
 
@@ -241,7 +242,7 @@ class Nude:
                 new_detected_regions.append(region)
 
         # 清理new_detected_regions
-        self_clear_regions(new_detected_regions)
+        self._clear_regions(new_detected_regions)
 
     def _clear_regions(self, detected_regions):
         """ 皮肤清理函数，只保存像素大于指定数量的皮肤区域"""
@@ -254,8 +255,8 @@ class Nude:
 
         # 如果皮肤区域小于三个，不是色情
         if len(self.skin_regions) < 3:
-            self.message = "Less than 3 skin regions
-            ({}).format(_skin_region_size = len(self.skin_regions))"""
+            self.message = "Less than 3 skin regions({})".\
+                format(len(self.skin_regions))
             self.result = False
             return self.result
 
@@ -269,20 +270,17 @@ class Nude:
 
         # 如果图像皮肤区域小于整个图像的15% ，那么不是色情图片
         if total_skin < self.total_pixels * 0.15:
-            self.message = "Total skin percentage lower than 15
-            ({: 2f})".format(total_skin / self.total_pixels * 100)
+            self.message = "Total skin percentage lower than 15({: 2f})".format(total_skin / self.total_pixels * 100)
             self.result = False
             return self.result
 
         # 如果最大皮肤区域小于总皮肤区域的45% ，不是色情图片
         if len(self.skin_regions[0]) / total_skin * 100 < 45:
-            self.message = "The largest region contains less than 45 percent
-            ({:.2f})".format(len(self.skin_regions[0]) / total_skin * 100)
+            self.message = "The largest region contains less than 45 percent({:.2f})".format(len(self.skin_regions[0]) / total_skin * 100)
 
         # 皮肤区域超过60个，不是色情图片
         if len(self.skin_regions) > 60:
-            self.message = "More than 60 skin
-            regions({})".format(len(self.skin_regions))
+            self.message = "More than 60 skin regions({})".format(len(self.skin_regions))
             self.result = False
             return self.result
 
@@ -294,10 +292,9 @@ class Nude:
 
     def inspect(self):
         """组织得到的信息"""
-        _image = '{} {} {} {]'.format(self.image.filename, self.image.format,
+        _image = '{} {} {} {}'.format(self.image.filename, self.image.format,
                                       self.width, self.height)
-        return "{_image}: result={_result}
-    message='{_message}'".format(_image=_image, _result=self.result,
+        return "{_image}: result={_result} message='{_message}'".format(_image=_image, _result=self.result,
                                  _message=self.message)
    
 
@@ -320,7 +317,7 @@ class Nude:
         
         # 将图像中皮肤像素设为白色，其余设为黑色
         for pixel in self.skin_map:
-            if pixel.if not in skin_idset:
+            if pixel.id not in skin_idset:
                 simage_data[pixel.x, pixel.y] = 0, 0, 0
             else:
                 simage_data[pixel.x, pixel.y] = 255, 255, 255
@@ -343,12 +340,9 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description='Detect nuditty in images.')
-    parser.add_argument('files', metavar='image', nargs='+', help='Images you
-                        wish to test')
-    parser.add_argument('-r', '--resize', action='store_true', help='Reduce
-                        image size to increase speed of scanning')
-    parser.add_argument('-v', '--visualization', action='store_true',
-                        help='Generating areas of skin image')
+    parser.add_argument('files', metavar='image', nargs='+', help='Images you wish to test')
+    parser.add_argument('-r', '--resize', action='store_true', help='Reduce image size to increase speed of scanning')
+    parser.add_argument('-v', '--visualization', action='store_true', help='Generating areas of skin image')
 
     args = parser.parse_args()
 
